@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}
+  Главная страница
+{% endblock %}
+{% block content %}
+  <h1>Последние обновления на сайте</h1>
+  <form method="get">
+    {% for tag in tag_list %}
+      <input type="checkbox" value={{ tag.slug }}>{{ tag.name }}</li>
+    {% endfor %}
+    {% comment %} <select multiple name='tag'>
+      <option value='' selected>Select a Tag</option>
+      {% for tag in tag_list %}
+        <option value={{ tag.slug }}>{{ tag.name }}</option>
+      {% endfor %}
+    </select> {% endcomment %}
+    <button type="submit">Submit form</button>
+  </form>
+  {% for post in page_obj %}
+    <ul>
+      <li>Дата публикации: {{ post.pub_date|date:'d E Y' }}</li>
+    </ul>
+    <p>{{ post.full_text|safe }}</p>
+    <a href="{% url 'news_portal:post_detail' post.pk %}">подробная информация</a>
+    {% if not forloop.last %}
+      <hr />
+    {% endif %}
+  {% endfor %}
+  {% comment %} {% include 'news_and_posts/includes/paginator.html' %} {% endcomment %}
+{% endblock %}

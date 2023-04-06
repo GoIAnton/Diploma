@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}
+  Пост {{ post.text|slice:':30' }}
+{% endblock %}
+{% block content %}
+  <div class>
+        <li>Дата публикации: {{ post.pub_date|date:'d E Y' }}</li>
+    <article>
+      <p>{{ post.text|linebreaks }}</p>
+    </article>
+  </div>
+{% endblock %}
