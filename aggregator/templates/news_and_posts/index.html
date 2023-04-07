@@ -1,30 +1,45 @@
 {% extends 'base.html' %}
 {% block title %}
-  Главная страница
+Главная страница
 {% endblock %}
 {% block content %}
-  <h1>Последние обновления на сайте</h1>
-  <form method="get">
-    {% for tag in tag_list %}
-      <input type="checkbox" value={{ tag.slug }}>{{ tag.name }}</li>
-    {% endfor %}
-    {% comment %} <select multiple name='tag'>
-      <option value='' selected>Select a Tag</option>
-      {% for tag in tag_list %}
-        <option value={{ tag.slug }}>{{ tag.name }}</option>
-      {% endfor %}
-    </select> {% endcomment %}
-    <button type="submit">Submit form</button>
-  </form>
-  {% for post in page_obj %}
-    <ul>
-      <li>Дата публикации: {{ post.pub_date|date:'d E Y' }}</li>
-    </ul>
-    <p>{{ post.full_text|safe }}</p>
-    <a href="{% url 'news_portal:post_detail' post.pk %}">подробная информация</a>
-    {% if not forloop.last %}
-      <hr />
-    {% endif %}
-  {% endfor %}
-  {% comment %} {% include 'news_and_posts/includes/paginator.html' %} {% endcomment %}
+<h1>Последние обновления на сайте</h1>
+
+<div class="accordion" id="accordionExample">
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+        aria-expanded="true" aria-controls="collapseOne">
+        Фильтр
+      </button>
+    </h2>
+    <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample" style="">
+      <div class="accordion-body">
+        <form method="get">
+          <fieldset>
+            <div>
+              {% for tag in tag_list %}
+              <input name="tag" value="{{ tag.slug }}" type="checkbox" class="btn-check" id="{{ tag.slug }}"
+                autocomplete="off">
+              <label class="btn btn-primary" for="{{ tag.slug }}">{{ tag.name }}</label>
+              {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-primary">Применить</button>
+          </fieldset>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% for post in page_obj %}
+<ul>
+  <li>Дата публикации: {{ post.pub_date|date:'d E Y' }}</li>
+</ul>
+<p>{{ post.full_text|safe }}</p>
+<a href="{% url 'news_portal:post_detail' post.pk %}">подробная информация</a>
+{% if not forloop.last %}
+<hr />
+{% endif %}
+{% endfor %}
+{% comment %} {% include 'news_and_posts/includes/paginator.html' %} {% endcomment %}
 {% endblock %}
