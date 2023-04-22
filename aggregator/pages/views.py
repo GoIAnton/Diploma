@@ -1,8 +1,8 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 
 from .models import Post, Tag
-from django.http import HttpResponse
+from .forms import PostForm
 
 def create_page_obj(request, post_list):
     paginator = Paginator(post_list, 10)
@@ -23,7 +23,7 @@ def index(request):
     }
     return render(
         request,
-        'news_and_posts/index.html',
+        'pages/index.html',
         context,
     )
 
@@ -33,4 +33,23 @@ def post_detail(request, post_id):
     context = {
         'post': post,
     }
-    return render(request, 'posts/post_detail.html', context)
+    return render(request, 'pages/post_detail.html', context)
+
+
+def article_create(request):
+    form = PostForm(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.save()
+            return redirect('pages:index')
+        return render(
+            request,
+            'pages/article_create.html',
+            {'form': form, 'is_edit': False}
+        )
+    return render(
+        request,
+        'pages/article_create.html',
+        {'form': form, 'is_edit': False}
+    )

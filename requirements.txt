@@ -1,2 +1,0 @@
-Django==2.2.19
-django-summernote==0.8.20.0

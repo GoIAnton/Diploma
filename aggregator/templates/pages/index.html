@@ -36,7 +36,7 @@
   <li>Дата публикации: {{ post.pub_date|date:'d E Y' }}</li>
 </ul>
 <p>{{ post.full_text|safe }}</p>
-<a href="{% url 'news_portal:post_detail' post.pk %}">подробная информация</a>
+<a href="{% url 'pages:post_detail' post.pk %}">подробная информация</a>
 {% if not forloop.last %}
 <hr />
 {% endif %}
