@@ -93,3 +93,11 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+AUTH_USER_MODEL = 'pages.User'
+
+LOGIN_URL = 'pages:login'
+
+LOGIN_REDIRECT_URL = 'pages:index'
+
+LOGOUT_REDIRECT_URL = 'pages:index'

@@ -8,9 +8,3 @@ urlpatterns = [
     path('summernote/', include('django_summernote.urls')),
     path('', include('pages.urls', namespace='pages')),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(
-        settings.MEDIA_URL,
-        document_root=settings.MEDIA_ROOT,
-    )

@@ -18,6 +18,12 @@ services:
       - db
     env_file:
       - ./.env
+  
+  rec_sys:
+    build: ../rec_sys
+    restart: always
+    depends_on:
+      - web
 
   nginx:
     image: nginx:1.21.3-alpine

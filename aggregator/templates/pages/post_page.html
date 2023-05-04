@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}
+  Пост {{ post.text|slice:':30' }}
+{% endblock %}
+{% block content %}
+<div class="col-12">
+  <div class="card">
+    <div class="card-body">
+      <p class="fw-medium">Автор: {{ post.author.username }}</p>
+      <h5 class="card-title">{{ post.title|safe }}</h5>
+      <h6 class="card-subtitle mb-2 text-body-secondary">Дата публикации: {{ post.pub_date|date:'d E Y' }}</h6>
+      <p class="card-text">{{ post.full_text|safe }}</p>
+      {% if like %}
+      <a href="{% url 'pages:like' post.pk %}" class="btn btn-danger active">
+        Убрать из избоанного
+      </a>
+      {% else %}
+      <a href="{% url 'pages:like' post.pk %}" class="btn btn-success">
+        Добавить в избранное
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
