@@ -4,9 +4,11 @@ import time
 import coll_filtering
 
 
-schedule.every(30).seconds.do(coll_filtering.copy_table, 1)
+# schedule.every(3).minutes.do(coll_filtering.create_recommendations)
 
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
+
+coll_filtering.create_recommendations()

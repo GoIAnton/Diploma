@@ -42,7 +42,7 @@ class Tag(models.Model):
     )
 
     def __str__(self):
-        return self.slug
+        return self.name
 
 
 class Post(models.Model):
@@ -70,7 +70,7 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
-    post = models.ForeignKey(
+    post = models.OneToOneField(
         Post,
         on_delete=models.CASCADE,
         related_name='comments',
