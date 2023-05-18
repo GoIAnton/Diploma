@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}
+  Страница пользователя
+{% endblock %}
+{% block content %}
+<div class="row gy-3">
+  <div class="col-12">
+    <p class="h5">Страница пользователя {{ author.username }}</p>
+  </div>
+  {% include 'includes/publications.html' %}
+</div>
+{% include 'includes/paginator.html' %}
+{% endblock %}

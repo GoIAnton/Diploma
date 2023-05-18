@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Страница модератора{% endblock %}
+{% block content %}
+<div class="row gy-3">
+  {% include 'includes/publications.html' %}
+</div>
+{% include 'includes/paginator.html' %}
+{% endblock %}

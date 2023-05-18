@@ -1,0 +1,26 @@
+<ul class="nav nav-pills">
+  <li class="nav-item">
+    <a 
+      class="nav-link {% if personal %}active{% endif %}"
+      href="{% url 'pages:personal_page' %}"
+    >
+      Рекомендации
+    </a>
+  </li>
+  <li class="nav-item">
+    <a 
+      class="nav-link {% if favorites %}active{% endif %}"
+      href="{% url 'pages:favorites' %}"
+    >
+      Избранное
+    </a>
+  </li>
+  <li class="nav-item">
+    <a 
+      class="nav-link {% if my_publications %}active{% endif %}"
+      href="{% url 'pages:my_publications' %}"
+    >
+      Мои новости и статьи
+    </a>
+  </li>
+</ul>

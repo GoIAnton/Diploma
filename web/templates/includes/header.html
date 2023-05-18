@@ -1,0 +1,34 @@
+<header>
+  <nav class="navbar navbar-light bg-light">
+    <div class="container">
+      <ul class="nav nav-pills">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'pages:index' %}">Главная</a>
+        </li>
+        {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'pages:personal_page' %}">Личная страница</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'pages:create' %}">Создать новость или статью</a>
+          </li>
+          {% if user.is_moderator %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'pages:moderation' %}">Страница модератора</a>
+            </li>
+          {% endif %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'pages:logout' %}">Выйти</a>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'pages:signup' %}">Создать аккаунт</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'pages:login' %}">Войти в аккаунт</a>
+          </li>
+        {% endif %}
+      <ul class="nav nav-pills">
+    </div>
+  </nav>
+</header>

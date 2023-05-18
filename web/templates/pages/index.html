@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}
+  Главная страница
+{% endblock %}
+{% block content %}
+<div class="row gy-3">
+  <div class="col-12">
+    <div class="accordion" id="accordionExample">
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+            aria-expanded="false" aria-controls="collapseOne">
+            Фильтр
+          </button>
+        </h2>
+        <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample" style="">
+          <div class="accordion-body">
+            <form method="get">
+              <fieldset>
+                <div class="container px-4">
+                  <div class="row gy-2">
+                    <div class="col-2">
+                      <input name="type" value="news" type="checkbox" class="btn-check" id="news" autocomplete="off">
+                      <label class="btn btn-outline-dark" for="news">Новости</label>
+                    </div>
+                    <div class="col-10">
+                      <input name="type" value="articles" type="checkbox" class="btn-check" id="articles" autocomplete="off">
+                      <label class="btn btn-outline-dark" for="articles">Статьи</label>
+                    </div>
+                    {% for tag in tag_list %}
+                      <div class="col-md-auto">
+                        <input name="tag" value="{{ tag.slug }}" type="checkbox" class="btn-check" id="{{ tag.slug }}" autocomplete="off">
+                        <label class="btn btn-light" for="{{ tag.slug }}">{{ tag.name }}</label>
+                      </div>
+                    {% endfor %}
+                    <div class="col-12">
+                      <div class="col-2 mx-auto">
+                        <button type="submit" class="btn btn-secondary">Применить</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% include 'includes/publications.html' %}
+</div>
+{% include 'includes/paginator.html' %}
+{% endblock %}

@@ -8,4 +8,4 @@ RUN pip3 install -r requirements.txt --no-cache-dir
 
 COPY . .
 
-CMD ["python3", "launch_schedule.py" ]
+CMD ["gunicorn", "web.wsgi:application", "--bind", "0:8000" ]

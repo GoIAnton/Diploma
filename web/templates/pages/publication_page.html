@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}
+  Публикация {{ publication.text|slice:':30' }}
+{% endblock %}
+{% block content %}
+<div class="row gy-3">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <p class="fw-medium">Автор:
+          <a href="{% url 'pages:user_page' publication.author.id %}">
+            {{ publication.author.username }}
+          </a>
+        </p>
+        <h5 class="card-title">{{ publication.title|safe }}</h5>
+        <h6 class="card-subtitle mb-2 text-body-secondary">Дата публикации: {{ publication.pub_date|date:'d E Y' }}</h6>
+        <p class="card-text">{{ publication.full_text|safe }}</p>
+        {% if user.is_authenticated and user.id != publication.author.id and publication.is_hidden == False %}
+          {% if like %}
+          <a href="{% url 'pages:like' publication.pk %}" class="btn btn-danger active">
+            Убрать из избоанного
+          </a>
+          {% else %}
+          <a href="{% url 'pages:like' publication.pk %}" class="btn btn-success">
+            Добавить в избранное
+          </a>
+          {% endif %}
+        {% endif %}
+        {% if user.id == publication.author.id %}
+          <a href="{% url 'pages:change' publication.pk %}" class="btn btn-light">
+            Редактировать
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% if show == 1 %}
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <div class="card-title">Отправить на исправление</div>
+        <form method="post" action="{% url 'pages:create_comment' publication.id %}">
+          {% csrf_token %}
+          {% include 'includes/create_fields.html' %} 
+          <div class="d-grid gap-1 col-2 mx-auto">
+            <button type="submit" class="btn btn-primary">
+              Отправить
+            </button>
+           </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% elif show == 2 %}
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        Замечание
+      </div>
+      <div class="card-body">
+        <p class="card-text">{{ comment.text }}</p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

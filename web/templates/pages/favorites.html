@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}
+  Страница избранного
+{% endblock %}
+{% block content %}
+<div class="row gy-3">
+  <div class="col-12">
+    <p class="h5">Страница пользователя {{ author.username }}</p>
+  </div>
+  {% include 'includes/switch.html' with personal=False favorites=True my_publications=False %}
+  {% include 'includes/publications.html' %}
+</div>
+{% include 'includes/paginator.html' %}
+{% endblock %}

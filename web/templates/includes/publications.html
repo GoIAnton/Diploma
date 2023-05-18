@@ -1,0 +1,20 @@
+{% for publication in publication_page %}
+  <div class="col-12">
+    <div class="card">
+      {% if publication.is_hidden %}
+        <h5 class="card-header">НУЖНО ИСПРАВИТЬ</h5>
+      {% endif %}
+      <div class="card-body">
+        <p class="fw-medium">Автор:
+          <a class="btn btn-outline-info btn-sm" href="{% url 'pages:user_page' publication.author.id %}">
+            {{ publication.author.username }}
+          </a>
+        </p>
+        <h5 class="card-title">{{ publication.title|safe }}</h5>
+        <h6 class="card-subtitle mb-2 text-body-secondary">Дата публикации: {{ publication.pub_date|date:'d E Y' }}</h6>
+        <p class="card-text">{{ publication.full_text|safe|truncatechars:255 }}</p>
+        <a href="{% url 'pages:publication_page' publication.pk %}" class="btn btn-secondary">подробная информация</a>
+      </div>
+    </div>
+  </div>
+{% endfor %}
