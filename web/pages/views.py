@@ -80,7 +80,7 @@ def publication_page(request, publication_id):
     if Like.objects.filter(user=user.id, publication=publication.id).exists():
         if getattr(get_object_or_404(Like, user=user.id, publication=publication.id), 'value')>= 1.0:
             like = True
-    else:
+    elif user != publication.author:
         Like.objects.get_or_create(
             user=user,
             publication=publication,
@@ -114,7 +114,8 @@ def publication_page(request, publication_id):
 @login_required
 def personal_page(request):
     author = get_object_or_404(User, id=request.user.id)
-    if 120 <= datetime.datetime.now().hour*60 + datetime.datetime.now().minute < 780: 
+    tzinfo = datetime.timezone(datetime.timedelta(hours=3.0))
+    if 120 <= datetime.datetime.now(tzinfo).hour*60 + datetime.datetime.now(tzinfo).minute < 780: 
         publications = (
             Publication.objects.filter(rec1__user=author, is_hidden=False).order_by('-rec1__value')
         )
@@ -179,7 +180,7 @@ def create(request):
 def change(request, publication_id):
     publication = get_object_or_404(Publication, id=publication_id)
     if request.user != publication.author:
-        return redirect('pages:publication_page', publication_id=publication_id)
+        return HttpResponseNotFound()
     form = PublicationForm(
         request.POST or None,
         instance=publication
@@ -199,7 +200,6 @@ def change(request, publication_id):
     )
 
 
-@login_required
 def moderation(request):
     if not request.user.is_moderator:
         return HttpResponseNotFound()
@@ -214,7 +214,6 @@ def moderation(request):
     )
 
 
-@login_required
 def create_comment(request, publication_id):
     if not request.user.is_moderator or request.method != 'POST':
         return HttpResponseNotFound()

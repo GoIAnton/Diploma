@@ -7,17 +7,17 @@ app_name = 'pages'
 
 urlpatterns = [
     path(
-        'publications/<int:publication_id>/like/',
+        'publication/<int:publication_id>/like/',
         views.like,
         name='like',
     ),
     path(
-        'publications/<int:publication_id>/create_comment/',
+        'publication/<int:publication_id>/create_comment/',
         views.create_comment,
         name='create_comment',
     ),
     path(
-        'publications/<int:publication_id>/',
+        'publication/<int:publication_id>/',
         views.publication_page,
         name='publication_page',
     ),

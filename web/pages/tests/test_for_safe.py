@@ -6,25 +6,57 @@ from django.urls import reverse
 from ..models import Publication, Comment, User
 
 
-class TaskForSafe(TestCase):
+class TaskAnonUser(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user = User.objects.create_user(username='Name')
-        cls.guest_client = Client()
-        cls.authorized_client = Client()
-        cls.authorized_client.force_login(cls.user)
+        cls.anon_user = Client()
+        cls.user = User.objects.create_user(username='Ordinary_user')
+        cls.user2 = User.objects.create_user(username='Ordinary_user_2')
+        cls.authorized_user = Client()
+        cls.authorized_user.force_login(cls.user)
+        cls.publication = Publication.objects.create(
+            title='Тестовая статья',
+            full_text='Тектс для тестовой статьи',
+            author = cls.user2,
+        )
 
-    def test_urls_use_correct_templates(self):
-        url_templates_names = {
-            '/': 'posts/index.html',
-            f'/group/{self.group.slug}/': 'posts/group_list.html',
-            f'/profile/{self.user.username}/': 'posts/profile.html',
-            f'/posts/{self.post.id}/': 'posts/post_detail.html',
-            '/create/': 'posts/create_post.html',
-            f'/posts/{self.post.id}/edit/': 'posts/create_post.html',
-        }
-        for address, template in url_templates_names.items():
+    def test_open_pages(self):
+        urls = [
+            '/personal_page/',
+            '/favorites/',
+            '/my_publications/',
+            '/create/',
+        ]
+        for address in urls:
             with self.subTest(address=address):
-                response = self.authorized_client.get(address)
-                self.assertTemplateUsed(response, template)
+                response = self.anon_user.get(address)
+                self.assertEqual(response.status_code, HTTPStatus.FOUND)
+
+    def test_templates(self):
+        urls = [
+            '/',
+            '/signup/',
+            '/login/'
+        ]
+        for address in urls:
+            with self.subTest(address=address):
+                response = self.anon_user.get(address)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    def test_change_by_other_user(self):
+        response = self.authorized_user.post(
+            reverse(
+                'pages:change',
+                kwargs={'publication_id': f'{self.publication.id}'}
+            ),
+            follow=True
+        )
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        self.assertTrue(
+            Publication.objects.filter(
+                id=self.publication.id,
+                author=self.user2,
+                full_text='Тектс для тестовой статьи',
+            ).exists()
+        )

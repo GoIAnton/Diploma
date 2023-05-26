@@ -69,13 +69,16 @@ def clear_rec():
             'user_id': pd.Series(dtype='int64')
         }
     )
-    if 0 <= datetime.datetime.now().hour*60 + datetime.datetime.now().minute < 720:
+    tzinfo = datetime.timezone(datetime.timedelta(hours=3.0))
+    if 0 <= datetime.datetime.now(tzinfo).hour*60 + datetime.datetime.now(tzinfo).minute < 690:
         rec.to_sql('pages_recommendation1', engine, if_exists='replace')
     else:
         rec.to_sql('pages_recommendation2', engine, if_exists='replace')
+
 def df_to_sql(df):
     engine = create_engine('postgresql+psycopg2://postgres:qwerty@db:5432/postgres')
-    if 0 <= datetime.datetime.now().hour*60 + datetime.datetime.now().minute < 720:
+    tzinfo = datetime.timezone(datetime.timedelta(hours=3.0))
+    if 0 <= datetime.datetime.now(tzinfo).hour*60 + datetime.datetime.now(tzinfo).minute < 690:
         df.to_sql('pages_recommendation1', engine, if_exists='append')
     else:
         df.to_sql('pages_recommendation2', engine, if_exists='append')
@@ -120,17 +123,16 @@ def create_recommendations():
         pub = df_publications.loc[df_publications['id'] == i].iloc[0]
         publications[i] = pub
         if not (pub['is_article'] == True or (pub['is_article'] == False
-            and now - pub['pub_date'] < datetime.timedelta(weeks=2))):
+            and now - pub['pub_date'] < datetime.timedelta(days=9))):
             unique_publications = np.delete(unique_publications, np.where(unique_publications == i))
     
     for i in unique_publications:
-        start = datetime.datetime.now()
         for j in unique_publications:
             if i == j:
                 continue
-            sum1 = 0
-            sum2 = 0
-            sum3 = 0
+            sum1 = 0.0
+            sum2 = 0.0
+            sum3 = 0.0
             for u in unique_users:
                 r_ui = ratings[i][u]
                 r_uj = ratings[j][u]
@@ -163,7 +165,7 @@ def create_recommendations():
                     r_uj = ratings[j][u]
                 else:
                     continue
-                sum1 += (r_uj-r_mean[j]) * j_cor[j]
+                sum1 += r_uj * j_cor[j]
                 sum2 += abs(j_cor[j])
             if sum2 == 0:
                 continue
