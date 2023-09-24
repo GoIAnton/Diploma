@@ -83,110 +83,53 @@ def df_to_sql(df):
     else:
         df.to_sql('pages_recommendation2', engine, if_exists='append')
 
-    
+
+def get_similar_users(data, publication_id):
+    users = data[data['publication_id'] == publication_id]['user_id'].unique()
+    return users
+
+
+def weighted_average(data, ratings_matrix_k, U_k, publication_id, user_id):
+    similar_users = get_similar_users(data, publication_id)
+    similar_ratings = ratings_matrix_k[similar_users, publication_id]
+    weights = np.dot(U_k[user_id], U_k[similar_users].T) / np.sum(np.abs(U_k[similar_users]), axis=1)
+    predicted_rating = np.dot(weights, similar_ratings) / np.sum(np.abs(weights))
+    # print(predicted_rating, flush=True)
+    return predicted_rating
+
+
 def create_recommendations():
-    df = likes_sql_to_df()
-    df = df.drop_duplicates()
-    df = df.sort_values(by=['publication_id'])
-    ratings = df.pivot_table(index='user_id', columns='publication_id', values='value')
+    data = likes_sql_to_df()
+    data = data.drop_duplicates()
+    ratings = data.pivot_table(index='user_id', columns='publication_id', values='value')
     ratings = ratings.fillna(0)
     clear_rec()
 
-    unique_publications = df.publication_id.unique()
-    unique_users = df.user_id.unique()
-    r_mean = {}
-    for publication in unique_publications:
-        r_mean[publication] = df.loc[df['publication_id'] == publication]['value'].mean()
-    sim = pd.DataFrame(
-        {
-            'cor': pd.Series(dtype='float64'),
-            'j': pd.Series(dtype='int64')
-        }
-    )
-    rec = pd.DataFrame(
-        {
-            'id': pd.Series(dtype='int64'),
-            'value': pd.Series(dtype='float64'),
-            'publication_id': pd.Series(dtype='int64'),
-            'user_id': pd.Series(dtype='int64')
-        }
-    )
-    id = 0
-
-    df_publications = publications_sql_to_df()
-    df_publications['pub_date'] = pd.to_datetime(df_publications.pub_date).dt.tz_localize(None)
-    publications = {}
-
-    now = datetime.datetime.now()
-
-    for i in unique_publications:
-        pub = df_publications.loc[df_publications['id'] == i].iloc[0]
-        publications[i] = pub
-        if not (pub['is_article'] == True or (pub['is_article'] == False
-            and now - pub['pub_date'] < datetime.timedelta(days=9))):
-            unique_publications = np.delete(unique_publications, np.where(unique_publications == i))
-    
-    for i in unique_publications:
-        for j in unique_publications:
-            if i == j:
-                continue
-            sum1 = 0.0
-            sum2 = 0.0
-            sum3 = 0.0
-            for u in unique_users:
-                r_ui = ratings[i][u]
-                r_uj = ratings[j][u]
-                sum1 += (r_ui-r_mean[i]) * (r_uj-r_mean[j])
-                sum2 += (r_ui-r_mean[i])**2
-                sum3 += (r_uj-r_mean[j])**2
-            if sum2==0 or sum3==0:
-                continue
-            sim = sim.append(
-                {
-                    'cor': sum1 / (sum2*sum3)**0.5,
-                    'j': j
-                },
-                ignore_index=True,
-            )
-
-        sim = sim.sort_values(by=['cor'], ascending=False).head(n=K)
-        nearest_j = sim['j'].tolist()
-        nearest_cor = sim['cor'].tolist()
-        j_cor = dict(zip(nearest_j, nearest_cor))
-
-        for u in unique_users:
-            if (ratings[i][u] > 0.01
-                or publications[i]['author'] == u):
-                continue
-            sum1 = 0.0
-            sum2 = 0.0
-            for j in nearest_j:
-                if ratings[j][u] > 0.01:
-                    r_uj = ratings[j][u]
-                else:
-                    continue
-                sum1 += r_uj * j_cor[j]
-                sum2 += abs(j_cor[j])
-            if sum2 == 0:
-                continue
-            rec = rec.append(
-                {
-                    'id': int(id),
-                    'value': sum1 / sum2 + r_mean[i],
-                    'publication_id': i,
-                    'user_id': u
-                },
-                ignore_index=True,
-            )
-            id += 1
-        sim = sim.iloc[0:0]
-        rec['id'] = rec['id'].apply(lambda f: format(f, '.0f'))
-        rec['publication_id'] = rec['publication_id'].apply(lambda f: format(f, '.0f'))
-        rec['user_id'] = rec['user_id'].apply(lambda f: format(f, '.0f'))
-        rec['id'] = rec['id'].astype(int)
-        rec['publication_id'] = rec['publication_id'].astype(int)
-        rec['user_id'] = rec['user_id'].astype(int)
-        df_to_sql(rec)
-        rec = rec.iloc[0:0]
-    
-    df_to_sql(rec)
+    start = datetime.datetime.now()
+    U, sigma, Vt = np.linalg.svd(ratings)
+    print(U, flush=True)
+    print(sigma, flush=True)
+    print(Vt, flush=True)
+    k = 50
+    U_k = U[:, :k]
+    sigma_k = np.diag(sigma[:k])
+    Vt_k = Vt[:k, :]
+    ratings_matrix_k = U_k @ sigma_k @ Vt_k
+    recommendations = pd.DataFrame(columns=['id', 'pred_rating', 'publication_id', 'user_id'])
+    # for publication_id in ratings.columns:
+    #     for user_id in ratings.index:
+    #         if ratings.loc[user_id, publication_id] == 0:
+    #             pred_rating = weighted_average(data, ratings_matrix_k, U_k, publication_id, user_id)
+    #             recommendations = recommendations.append({'id': len(recommendations),
+    #                                                       'pred_rating': pred_rating,
+    #                                                       'publication_id': publication_id,
+    #                                                       'user_id': user_id}, ignore_index=True)
+    recommendations = recommendations.sort_values(by='pred_rating', ascending=False)
+    recommendations['id'] = recommendations['id'].apply(lambda f: format(f, '.0f'))
+    recommendations['publication_id'] = recommendations['publication_id'].apply(lambda f: format(f, '.0f'))
+    recommendations['id'] = recommendations['id'].astype(int)
+    recommendations['publication_id'] = recommendations['publication_id'].astype(int)
+    recommendations['user_id'] = recommendations['user_id'].astype(int)
+    end = datetime.datetime.now()
+    print(end-start, flush=True)
+    df_to_sql(recommendations)
